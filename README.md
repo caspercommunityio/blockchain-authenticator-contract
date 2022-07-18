@@ -101,7 +101,7 @@ To deploy it on testnet, we have to use the following command :
 casper-client put-deploy --chain-name casper-test -n http://95.216.67.162:7777 -k /path/to/your/secret/keys/private.pem -p 1000000000 -s /path/to/your/project/contract/target/wasm32-unknown-unknown/release/contract.wasm --session-args-complex /path/to/your/args.txt
 ```
 
-As you can see, we use a file to store the args because the type CLList is considered as complex.
+As you can see, we use a file to store the args because the type CLList is considered complex.
 
 The content of the file should be like this :
 
@@ -139,7 +139,7 @@ List of 2 Elements "ID1;VALUE, ID2;VALUE" => 1e00000002000000090000004944313b564
 List of 3 Elements "ID1;VALUE, ID2;VALUE, ID3;VALUE" => 2b00000003000000090000004944313b56414c5545090000004944323b56414c5545090000004944333b56414c55450e0a
 ```
 
-With these examples, you can try different tests scenario on testnet.
+With these examples, you can try different tests scenarios on testnet.
 
 The result of the deploy should be like this :
 
@@ -158,7 +158,7 @@ You can check the result of the deploy on https://testnet.cspr.live.
 
 ## How to write the contract for another blockchain
 
-The smart contract must stored an array of string with the following format "ID;VALUE".
+The smart contract must store an array of string with the following format "ID;VALUE".
 Then when you call the smartcontract, you must have at least 2 parameters :
 - method :
   - add : Add the "keys" to the current list of string
