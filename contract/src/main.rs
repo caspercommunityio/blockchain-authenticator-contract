@@ -37,6 +37,7 @@ pub fn create_lists_if_not_exists(named_key: &str) {
         }
     }
 }
+
 /**
  * pub fn remove_all_elements - Reset the list so that no element are in sync
  *
@@ -55,12 +56,12 @@ pub fn remove_all_elements(named_key: &str) {
 }
 
 /**
- * pub fn create_or_add_secret_code - Create or update a list of elements
+ * pub fn create_or_update_secret_code_if_exists - Add or Update a list of string from the existing elements.
  *
- * @param  {type} secret_code: String secret_code should be "[ID];[VALUE]"
- * @return {type}                     no return type
+ * @param  {type} values_to_add: Vec<String> List of string where the content of each line should be "[ID];[VALUE]"
+ * @return {type}                               No return value
  */
-pub fn create_or_update_secret_code(named_key: &str, secret_code: String) {
+pub fn create_or_update_secret_code_if_exists(named_key: &str, values_to_add: Vec<String>) {
     //Look for the named key
     match runtime::get_key(named_key) {
         Some(_key) => {
@@ -69,9 +70,22 @@ pub fn create_or_update_secret_code(named_key: &str, secret_code: String) {
             //Get the value of the URef
             let mut existing_secret_codes: Vec<String> =
                 storage::read(key).unwrap_or_revert().unwrap_or_revert();
-            //Add the content to the existing secret codes
-            existing_secret_codes.push(secret_code);
-            //Save the list
+
+            //Loop through each secret code that we want to add
+            for value_to_add in values_to_add.into_iter() {
+                //Split the content to get the ID and the VALUE
+                let secret_code_elements: Vec<&str> = value_to_add.as_str().split(";").collect();
+                //Search if we have the ID in the existing secret codes
+                //If yes, we remove it. So we can update it.
+                if let Some(index) = existing_secret_codes
+                    .iter()
+                    .position(|r| r.contains(secret_code_elements[0]))
+                {
+                    existing_secret_codes.remove(index);
+                }
+                existing_secret_codes.push(value_to_add);
+            }
+            //Once we are done, we save our content
             storage::write(key, existing_secret_codes);
         }
         None => {}
@@ -131,20 +145,21 @@ pub fn remove_secret_code_if_exists(named_key: &str, values_to_remove: Vec<Strin
  **/
 #[no_mangle]
 pub extern "C" fn call() {
-    let data: Vec<String> = runtime::get_named_arg(DATA_ARG_NAME);
+    //let data: Vec<String> = runtime::get_named_arg(DATA_ARG_NAME);
     let method: String = runtime::get_named_arg(METHOD_ARG_NAME);
     let named_key: String = runtime::get_named_arg(NAMED_KEY_ARG_NAME);
 
-    //We create the named key if it doenst exist
+    //We create the named key if it doesnt exist
     create_lists_if_not_exists(named_key.as_str());
-    //We remove the existing elements
-    remove_secret_code_if_exists(named_key.as_str(), runtime::get_named_arg(DATA_ARG_NAME));
     //If the method is "add", we add the elements in parameter to the existing elements
     if method == "add" {
-        let values_to_store = data.into_iter();
-        for value_to_store in values_to_store {
-            create_or_update_secret_code(named_key.as_str(), value_to_store);
-        }
+        create_or_update_secret_code_if_exists(
+            named_key.as_str(),
+            runtime::get_named_arg(DATA_ARG_NAME),
+        );
+    } else if method == "del" {
+        //We remove the existing elements
+        remove_secret_code_if_exists(named_key.as_str(), runtime::get_named_arg(DATA_ARG_NAME));
     } else if method == "delall" {
         remove_all_elements(named_key.as_str());
     }

@@ -9,4 +9,4 @@
 
 ## Reporting a Vulnerability
 
-If you find a security vulnerability in Casper Scala SDK, please send an email to hello@caspercommunity.io.
+If you find a security vulnerability in Blockchain Authenticator Contract, please send an email to hello@caspercommunity.io.
